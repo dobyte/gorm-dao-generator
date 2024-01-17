@@ -134,6 +134,72 @@ func (dao *${VarDaoClassName}) Count(ctx context.Context, filterFunc ${VarDaoPre
 	return
 }
 
+// Sum returns the sum of the given field.
+func (dao *${VarDaoClassName}) Sum(ctx context.Context, columnFunc ${VarDaoPrefixName}ColumnFunc, filterFunc ...${VarDaoPrefixName}FilterFunc) (sums []float64, err error) {
+	columns := columnFunc(dao.Columns)
+	if len(columns) == 0 {
+		return
+	}
+
+	fields := make([]string, len(columns))
+	for i, column := range columns {
+		fields[i] = fmt.Sprintf("COALESCE(SUM(${SymbolBacktick}%s${SymbolBacktick}), 0) as ${SymbolBacktick}sum_%s${SymbolBacktick}", column, column)
+	}
+
+	db := dao.Table.WithContext(ctx).Select(strings.Join(fields, ","))
+
+	if len(filterFunc) > 0 && filterFunc[0] != nil {
+		db = db.Where(filterFunc[0](dao.Columns))
+	}
+
+	rst := make(map[string]interface{}, len(columns))
+
+	if err = db.Scan(&rst).Error; err != nil {
+		return
+	}
+
+	for _, column := range columns {
+		val, _ := rst[fmt.Sprintf("sum_%s", column)]
+		sum, _ := strconv.ParseFloat(val.(string), 64)
+		sums = append(sums, sum)
+	}
+
+	return
+}
+
+// Avg returns the avg of the given field.
+func (dao *${VarDaoClassName}) Avg(ctx context.Context, columnFunc ${VarDaoPrefixName}ColumnFunc, filterFunc ...${VarDaoPrefixName}FilterFunc) (avgs []float64, err error) {
+	columns := columnFunc(dao.Columns)
+	if len(columns) == 0 {
+		return
+	}
+
+	fields := make([]string, len(columns))
+	for i, column := range columns {
+		fields[i] = fmt.Sprintf("COALESCE(AVG(${SymbolBacktick}%s${SymbolBacktick}), 0) as ${SymbolBacktick}avg_%s${SymbolBacktick}", column, column)
+	}
+
+	db := dao.Table.WithContext(ctx).Select(strings.Join(fields, ","))
+
+	if len(filterFunc) > 0 && filterFunc[0] != nil {
+		db = db.Where(filterFunc[0](dao.Columns))
+	}
+
+	rst := make(map[string]interface{}, len(columns))
+
+	if err = db.Scan(&rst).Error; err != nil {
+		return
+	}
+
+	for _, column := range columns {
+		val, _ := rst[fmt.Sprintf("avg_%s", column)]
+		avg, _ := strconv.ParseFloat(val.(string), 64)
+		avgs = append(avgs, avg)
+	}
+
+	return
+}
+
 // First executes a first command and returns a model for one record in the table.
 func (dao *${VarDaoClassName}) First(ctx context.Context, filterFunc ${VarDaoPrefixName}FilterFunc, columnFunc ...${VarDaoPrefixName}ColumnFunc) (*${VarModelPackageName}.${VarModelClassName}, error) {
 	var (
