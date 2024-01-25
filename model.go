@@ -17,6 +17,8 @@ const (
 	pkg2 = "context"
 	pkg3 = "gorm.io/gorm"
 	pkg4 = "errors"
+	pkg5 = "strconv"
+	pkg6 = "strings"
 )
 
 type field struct {
@@ -51,13 +53,15 @@ func newModel(opts *options) *model {
 	m := &model{
 		opts:    opts,
 		fields:  make([]*field, 0),
-		imports: make(map[string]string, 8),
+		imports: make(map[string]string, 7),
 	}
 
 	m.addImport(pkg1)
 	m.addImport(pkg2)
 	m.addImport(pkg3)
 	m.addImport(pkg4)
+	m.addImport(pkg5)
+	m.addImport(pkg6)
 
 	return m
 }

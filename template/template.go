@@ -92,11 +92,11 @@ func (dao *${VarDaoClassName}) Insert(ctx context.Context, models ...*${VarModel
 }
 
 // Delete executes a delete command to delete at most one document from the collection.
-func (dao *${VarDaoClassName}) Delete(ctx context.Context, filterFunc ${VarDaoPrefixName}FilterFunc) (int64, error) {
+func (dao *${VarDaoClassName}) Delete(ctx context.Context, filterFunc ...${VarDaoPrefixName}FilterFunc) (int64, error) {
 	db := dao.Table.WithContext(ctx)
 
-	if filterFunc != nil {
-		db = db.Where(filterFunc(dao.Columns))
+	if len(filterFunc) > 0 && filterFunc[0] != nil {
+		db = db.Where(filterFunc[0](dao.Columns))
 	}
 
 	rst := db.Delete(&${VarModelPackageName}.${VarModelClassName}{})
@@ -122,14 +122,80 @@ func (dao *${VarDaoClassName}) Update(ctx context.Context, filterFunc ${VarDaoPr
 }
 
 // Count returns the number of documents in the collection.
-func (dao *${VarDaoClassName}) Count(ctx context.Context, filterFunc ${VarDaoPrefixName}FilterFunc) (count int64, err error) {
+func (dao *${VarDaoClassName}) Count(ctx context.Context, filterFunc ...${VarDaoPrefixName}FilterFunc) (count int64, err error) {
     db := dao.Table.WithContext(ctx)
 
-	if filterFunc != nil {
-		db = db.Where(filterFunc(dao.Columns))
+	if len(filterFunc) > 0 && filterFunc[0] != nil {
+		db = db.Where(filterFunc[0](dao.Columns))
 	}
 
 	err = db.Count(&count).Error
+
+	return
+}
+
+// Sum returns the sum of the given field.
+func (dao *${VarDaoClassName}) Sum(ctx context.Context, columnFunc ${VarDaoPrefixName}ColumnFunc, filterFunc ...${VarDaoPrefixName}FilterFunc) (sums []float64, err error) {
+	columns := columnFunc(dao.Columns)
+	if len(columns) == 0 {
+		return
+	}
+
+	fields := make([]string, len(columns))
+	for i, column := range columns {
+		fields[i] = fmt.Sprintf("COALESCE(SUM(%s), 0) as ${SymbolBacktick}sum_%d${SymbolBacktick}", column, i)
+	}
+
+	db := dao.Table.WithContext(ctx).Select(strings.Join(fields, ","))
+
+	if len(filterFunc) > 0 && filterFunc[0] != nil {
+		db = db.Where(filterFunc[0](dao.Columns))
+	}
+
+	rst := make(map[string]interface{}, len(columns))
+
+	if err = db.Scan(&rst).Error; err != nil {
+		return
+	}
+
+	for i := range columns {
+		val, _ := rst[fmt.Sprintf("sum_%d", i)]
+		sum, _ := strconv.ParseFloat(val.(string), 64)
+		sums = append(sums, sum)
+	}
+
+	return
+}
+
+// Avg returns the avg of the given field.
+func (dao *${VarDaoClassName}) Avg(ctx context.Context, columnFunc ${VarDaoPrefixName}ColumnFunc, filterFunc ...${VarDaoPrefixName}FilterFunc) (avgs []float64, err error) {
+	columns := columnFunc(dao.Columns)
+	if len(columns) == 0 {
+		return
+	}
+
+	fields := make([]string, len(columns))
+	for i, column := range columns {
+		fields[i] = fmt.Sprintf("COALESCE(AVG(%s), 0) as ${SymbolBacktick}avg_%d${SymbolBacktick}", column, i)
+	}
+
+	db := dao.Table.WithContext(ctx).Select(strings.Join(fields, ","))
+
+	if len(filterFunc) > 0 && filterFunc[0] != nil {
+		db = db.Where(filterFunc[0](dao.Columns))
+	}
+
+	rst := make(map[string]interface{}, len(columns))
+
+	if err = db.Scan(&rst).Error; err != nil {
+		return
+	}
+
+	for i := range columns {
+		val, _ := rst[fmt.Sprintf("avg_%d", i)]
+		avg, _ := strconv.ParseFloat(val.(string), 64)
+		avgs = append(avgs, avg)
+	}
 
 	return
 }

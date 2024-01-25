@@ -107,6 +107,7 @@ func (g *generator) makeModelInternalDao(m *model) {
 	replaces[varModelColumnsDefineKey] = m.modelColumnsDefined()
 	replaces[varModelColumnsInstanceKey] = m.modelColumnsInstance()
 	replaces[varPackagesKey] = m.packages()
+	replaces[symbolBacktickKey] = symbolBacktick
 
 	if tableName := g.modelNames[m.modelName]; tableName != "" {
 		replaces[varTableNameKey] = tableName
