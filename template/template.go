@@ -74,6 +74,17 @@ func New${VarDaoClassName}(db *gorm.DB) *${VarDaoClassName} {
 	return dao
 }
 
+// New create a new instance and return
+func (dao *${VarDaoClassName}) New(tx *gorm.DB) *${VarDaoClassName} {
+	d := &${VarDaoClassName}{}
+	d.Columns = dao.Columns
+	d.TableName = dao.TableName
+	d.Database = tx
+	d.Table = tx.Model(&${VarModelPackageName}.${VarModelClassName}{}).Table(d.TableName)
+
+	return d
+}
+
 // Insert executes an insert command to insert multiple documents into the collection.
 func (dao *${VarDaoClassName}) Insert(ctx context.Context, models ...*${VarModelPackageName}.${VarModelClassName}) (int64, error) {
 	if len(models) == 0 {
