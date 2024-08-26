@@ -116,11 +116,15 @@ func (dao *${VarDaoClassName}) Delete(ctx context.Context, filterFunc ...${VarDa
 }
 
 // Update executes an update command to update documents in the collection.
-func (dao *${VarDaoClassName}) Update(ctx context.Context, filterFunc ${VarDaoPrefixName}FilterFunc, updateFunc ${VarDaoPrefixName}UpdateFunc) (int64, error) {
+func (dao *${VarDaoClassName}) Update(ctx context.Context, filterFunc ${VarDaoPrefixName}FilterFunc, updateFunc ${VarDaoPrefixName}UpdateFunc, columnFunc ...${VarDaoPrefixName}ColumnFunc) (int64, error) {
 	db := dao.Table.WithContext(ctx)
 
 	if filterFunc != nil {
 		db = db.Where(filterFunc(dao.Columns))
+	}
+
+	if len(columnFunc) > 0 && columnFunc[0] != nil {
+		db = db.Select(columnFunc[0](dao.Columns))
 	}
 
 	if updateFunc != nil {
