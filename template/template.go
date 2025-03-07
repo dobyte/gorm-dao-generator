@@ -50,9 +50,9 @@ type ${VarDaoPrefixName}ColumnFunc func(cols *${VarDaoPrefixName}Columns) []stri
 type ${VarDaoPrefixName}OrderFunc func(cols *${VarDaoPrefixName}Columns) []${VarDaoPrefixName}OrderBy
 
 type ${VarDaoClassName} struct {
+	model     *${VarModelPackageName}.${VarModelClassName}
 	Columns   *${VarDaoPrefixName}Columns
 	Database  *gorm.DB
-	Table     *gorm.DB
 	TableName string
 }
 
@@ -66,10 +66,10 @@ var ${VarDaoVariableName}Columns = &${VarDaoPrefixName}Columns{
 
 func New${VarDaoClassName}(db *gorm.DB) *${VarDaoClassName} {
 	dao := &${VarDaoClassName}{}
+	dao.model = &${VarModelPackageName}.${VarModelClassName}{}
 	dao.Columns = ${VarDaoVariableName}Columns
 	dao.TableName = "${VarTableName}"
 	dao.Database = db
-	dao.Table = db.Model(&${VarModelPackageName}.${VarModelClassName}{}).Table(dao.TableName)
 
 	return dao
 }
@@ -77,12 +77,17 @@ func New${VarDaoClassName}(db *gorm.DB) *${VarDaoClassName} {
 // New create a new instance and return
 func (dao *${VarDaoClassName}) New(tx *gorm.DB) *${VarDaoClassName} {
 	d := &${VarDaoClassName}{}
+	d.model = dao.model
 	d.Columns = dao.Columns
 	d.TableName = dao.TableName
 	d.Database = tx
-	d.Table = tx.Model(&${VarModelPackageName}.${VarModelClassName}{}).Table(d.TableName)
 
 	return d
+}
+
+// Table create a new table db instance
+func (dao *GameRoom) Table() *gorm.DB {
+	return dao.Database.Model(dao.model).Table(dao.TableName)
 }
 
 // Insert executes an insert command to insert multiple documents into the collection.
@@ -94,9 +99,9 @@ func (dao *${VarDaoClassName}) Insert(ctx context.Context, models ...*${VarModel
 	var rst *gorm.DB
 
 	if len(models) == 1 {
-		rst = dao.Table.WithContext(ctx).Create(models[0])
+		rst = dao.Table().WithContext(ctx).Create(models[0])
 	} else {
-		rst = dao.Table.WithContext(ctx).Create(models)
+		rst = dao.Table().WithContext(ctx).Create(models)
 	}
 
 	return rst.RowsAffected, rst.Error
@@ -104,7 +109,7 @@ func (dao *${VarDaoClassName}) Insert(ctx context.Context, models ...*${VarModel
 
 // Delete executes a delete command to delete at most one document from the collection.
 func (dao *${VarDaoClassName}) Delete(ctx context.Context, filterFunc ...${VarDaoPrefixName}FilterFunc) (int64, error) {
-	db := dao.Table.WithContext(ctx)
+	db := dao.Table().WithContext(ctx)
 
 	if len(filterFunc) > 0 && filterFunc[0] != nil {
 		db = db.Where(filterFunc[0](dao.Columns))
@@ -117,7 +122,7 @@ func (dao *${VarDaoClassName}) Delete(ctx context.Context, filterFunc ...${VarDa
 
 // Update executes an update command to update documents in the collection.
 func (dao *${VarDaoClassName}) Update(ctx context.Context, filterFunc ${VarDaoPrefixName}FilterFunc, updateFunc ${VarDaoPrefixName}UpdateFunc, columnFunc ...${VarDaoPrefixName}ColumnFunc) (int64, error) {
-	db := dao.Table.WithContext(ctx)
+	db := dao.Table().WithContext(ctx)
 
 	if filterFunc != nil {
 		db = db.Where(filterFunc(dao.Columns))
@@ -138,7 +143,7 @@ func (dao *${VarDaoClassName}) Update(ctx context.Context, filterFunc ${VarDaoPr
 
 // Count returns the number of documents in the collection.
 func (dao *${VarDaoClassName}) Count(ctx context.Context, filterFunc ...${VarDaoPrefixName}FilterFunc) (count int64, err error) {
-    db := dao.Table.WithContext(ctx)
+    db := dao.Table().WithContext(ctx)
 
 	if len(filterFunc) > 0 && filterFunc[0] != nil {
 		db = db.Where(filterFunc[0](dao.Columns))
@@ -161,7 +166,7 @@ func (dao *${VarDaoClassName}) Sum(ctx context.Context, columnFunc ${VarDaoPrefi
 		fields[i] = fmt.Sprintf("COALESCE(SUM(%s), 0) as ${SymbolBacktick}sum_%d${SymbolBacktick}", column, i)
 	}
 
-	db := dao.Table.WithContext(ctx).Select(strings.Join(fields, ","))
+	db := dao.Table().WithContext(ctx).Select(strings.Join(fields, ","))
 
 	if len(filterFunc) > 0 && filterFunc[0] != nil {
 		db = db.Where(filterFunc[0](dao.Columns))
@@ -194,7 +199,7 @@ func (dao *${VarDaoClassName}) Avg(ctx context.Context, columnFunc ${VarDaoPrefi
 		fields[i] = fmt.Sprintf("COALESCE(AVG(%s), 0) as ${SymbolBacktick}avg_%d${SymbolBacktick}", column, i)
 	}
 
-	db := dao.Table.WithContext(ctx).Select(strings.Join(fields, ","))
+	db := dao.Table().WithContext(ctx).Select(strings.Join(fields, ","))
 
 	if len(filterFunc) > 0 && filterFunc[0] != nil {
 		db = db.Where(filterFunc[0](dao.Columns))
@@ -219,7 +224,7 @@ func (dao *${VarDaoClassName}) Avg(ctx context.Context, columnFunc ${VarDaoPrefi
 func (dao *${VarDaoClassName}) First(ctx context.Context, filterFunc ${VarDaoPrefixName}FilterFunc, columnFunc ...${VarDaoPrefixName}ColumnFunc) (*${VarModelPackageName}.${VarModelClassName}, error) {
 	var (
 		model = &${VarModelPackageName}.${VarModelClassName}{}
-		db    = dao.Table.WithContext(ctx)
+		db    = dao.Table().WithContext(ctx)
 	)
 
 	if filterFunc != nil {
@@ -248,7 +253,7 @@ func (dao *${VarDaoClassName}) First(ctx context.Context, filterFunc ${VarDaoPre
 func (dao *${VarDaoClassName}) Last(ctx context.Context, filterFunc ${VarDaoPrefixName}FilterFunc, columnFunc ...${VarDaoPrefixName}ColumnFunc) (*${VarModelPackageName}.${VarModelClassName}, error) {
 	var (
 		model = &${VarModelPackageName}.${VarModelClassName}{}
-		db    = dao.Table.WithContext(ctx)
+		db    = dao.Table().WithContext(ctx)
 	)
 
 	if filterFunc != nil {
@@ -277,7 +282,7 @@ func (dao *${VarDaoClassName}) Last(ctx context.Context, filterFunc ${VarDaoPref
 func (dao *${VarDaoClassName}) FindOne(ctx context.Context, filterFunc ${VarDaoPrefixName}FilterFunc, columnFunc ...${VarDaoPrefixName}ColumnFunc) (*${VarModelPackageName}.${VarModelClassName}, error) {
 	var (
 		model = &${VarModelPackageName}.${VarModelClassName}{}
-		db    = dao.Table.WithContext(ctx)
+		db    = dao.Table().WithContext(ctx)
 	)
 
 	if filterFunc != nil {
@@ -306,7 +311,7 @@ func (dao *${VarDaoClassName}) FindOne(ctx context.Context, filterFunc ${VarDaoP
 func (dao *${VarDaoClassName}) FindMany(ctx context.Context, filterFunc ${VarDaoPrefixName}FilterFunc, columnFunc ${VarDaoPrefixName}ColumnFunc, orderFunc ${VarDaoPrefixName}OrderFunc, limitAndOffset ...int) ([]*${VarModelPackageName}.${VarModelClassName}, error) {
 	var (
 		models = make([]*${VarModelPackageName}.${VarModelClassName}, 0)
-		db     = dao.Table.WithContext(ctx)
+		db     = dao.Table().WithContext(ctx)
 	)
 
 	if filterFunc != nil {
