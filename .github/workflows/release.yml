@@ -31,4 +31,4 @@ jobs:
           goarch: ${{ matrix.goarch }}
           goversion: "https://dl.google.com/go/go1.23.8.linux-amd64.tar.gz"
           binary_name: "gorm-dao-generator"
-          extra_files: LICENSE README.md README-zh.md
+          extra_files: LICENSE
