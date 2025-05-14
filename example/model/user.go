@@ -30,7 +30,7 @@ const (
 	StatusForbidden               // 封禁
 )
 
-//go:generate mongo-dao-generator -model-dir=. -model-names=User -dao-dir=../dao/
+//go:generate gorm-dao-generator -model-dir=. -model-names=User -dao-dir=../dao/
 type User struct {
 	ID             int64          `gorm:"column:id"`
 	UID            int32          `gorm:"column:uid"`                            // 用户ID

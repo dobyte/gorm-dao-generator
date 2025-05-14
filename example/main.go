@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"log"
+	"time"
+
 	"github.com/dobyte/gorm-dao-generator/example/dao"
 	"github.com/dobyte/gorm-dao-generator/example/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
 func main() {
@@ -25,7 +26,7 @@ func main() {
 
 	_, err = mailDao.Insert(baseCtx, &model.Mail{
 		Title:    "gorm-dao-generator introduction",
-		Content:  "the gorm-dao-generator is a tool for automatically generating Mysql Data Access Object.",
+		Content:  "The gorm-dao-generator is a tool for automatically generating Mysql Data Access Object.",
 		Sender:   1,
 		Receiver: 2,
 		Status:   1,

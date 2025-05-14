@@ -16,54 +16,82 @@ import (
 	"strings"
 )
 
-type MailOrderBy struct {
+type UserOrderBy struct {
 	Column string	
 	Order  string
 }
 
-type MailFilterFunc func(cols *MailColumns) interface{}
-type MailUpdateFunc func(cols *MailColumns) interface{}
-type MailColumnFunc func(cols *MailColumns) []string
-type MailOrderFunc func(cols *MailColumns) []MailOrderBy
+type UserFilterFunc func(cols *UserColumns) interface{}
+type UserUpdateFunc func(cols *UserColumns) interface{}
+type UserColumnFunc func(cols *UserColumns) []string
+type UserOrderFunc func(cols *UserColumns) []UserOrderBy
 
-type Mail struct {
-	Columns   *MailColumns
+type User struct {
+	Columns   *UserColumns
 	Database  *gorm.DB
 	TableName string
 }
 
-type MailColumns struct {
-	ID       string // 邮件ID
-	Title    string // 邮件标题
-	Content  string // 邮件内容
-	Sender   string // 邮件发送者
-	Receiver string // 邮件接受者
-	Status   string // 邮件状态
-	SendTime string // 发送时间
+type UserColumns struct {
+	ID             string 
+	UID            string // 用户ID
+	Account        string // 用户账号
+	Password       string // 用户密码
+	Salt           string // 密码
+	Mobile         string // 用户手机
+	Email          string // 用户邮箱
+	Nickname       string // 用户昵称
+	Signature      string // 用户签名
+	Gender         string // 用户性别
+	Level          string // 用户等级
+	Experience     string // 用户经验
+	Coin           string // 用户金币
+	Type           string // 用户类型
+	Status         string // 用户状态
+	DeviceID       string // 设备ID
+	ThirdPlatforms string // 第三方平台
+	RegisterIP     string // 注册IP
+	RegisterTime   string // 注册时间
+	LastLoginIP    string // 最近登录IP
+	LastLoginTime  string // 最近登录时间
 }
 
-var mailColumns = &MailColumns{
-	ID:       "id",        // 邮件ID
-	Title:    "title",     // 邮件标题
-	Content:  "content",   // 邮件内容
-	Sender:   "sender",    // 邮件发送者
-	Receiver: "receiver",  // 邮件接受者
-	Status:   "status",    // 邮件状态
-	SendTime: "send_time", // 发送时间
+var userColumns = &UserColumns{
+	ID:             "id",              
+	UID:            "uid",             // 用户ID
+	Account:        "account",         // 用户账号
+	Password:       "password",        // 用户密码
+	Salt:           "salt",            // 密码
+	Mobile:         "mobile",          // 用户手机
+	Email:          "email",           // 用户邮箱
+	Nickname:       "nickname",        // 用户昵称
+	Signature:      "signature",       // 用户签名
+	Gender:         "gender",          // 用户性别
+	Level:          "level",           // 用户等级
+	Experience:     "experience",      // 用户经验
+	Coin:           "coin",            // 用户金币
+	Type:           "type",            // 用户类型
+	Status:         "status",          // 用户状态
+	DeviceID:       "device_id",       // 设备ID
+	ThirdPlatforms: "third_platforms", // 第三方平台
+	RegisterIP:     "register_ip",     // 注册IP
+	RegisterTime:   "register_time",   // 注册时间
+	LastLoginIP:    "last_login_ip",   // 最近登录IP
+	LastLoginTime:  "last_login_time", // 最近登录时间
 }
 
-func NewMail(db *gorm.DB) *Mail {
-	dao := &Mail{}
-	dao.Columns = mailColumns
-	dao.TableName = "mail"
+func NewUser(db *gorm.DB) *User {
+	dao := &User{}
+	dao.Columns = userColumns
+	dao.TableName = "user"
 	dao.Database = db
 
 	return dao
 }
 
 // New create a new instance and return
-func (dao *Mail) New(tx *gorm.DB) *Mail {
-	d := &Mail{}
+func (dao *User) New(tx *gorm.DB) *User {
+	d := &User{}
 	d.Columns = dao.Columns
 	d.TableName = dao.TableName
 	d.Database = tx
@@ -72,12 +100,12 @@ func (dao *Mail) New(tx *gorm.DB) *Mail {
 }
 
 // Table create a new table db instance
-func (dao *Mail) Table(ctx context.Context) *gorm.DB {
-	return dao.Database.Model(&modelpkg.Mail{}).Table(dao.TableName).WithContext(ctx)
+func (dao *User) Table(ctx context.Context) *gorm.DB {
+	return dao.Database.Model(&modelpkg.User{}).Table(dao.TableName).WithContext(ctx)
 }
 
 // Insert executes an insert command to insert multiple documents into the collection.
-func (dao *Mail) Insert(ctx context.Context, models ...*modelpkg.Mail) (int64, error) {
+func (dao *User) Insert(ctx context.Context, models ...*modelpkg.User) (int64, error) {
 	if len(models) == 0 {
 		return 0, errors.New("models is empty")
 	}
@@ -94,20 +122,20 @@ func (dao *Mail) Insert(ctx context.Context, models ...*modelpkg.Mail) (int64, e
 }
 
 // Delete executes a delete command to delete at most one document from the collection.
-func (dao *Mail) Delete(ctx context.Context, filterFunc ...MailFilterFunc) (int64, error) {
+func (dao *User) Delete(ctx context.Context, filterFunc ...UserFilterFunc) (int64, error) {
 	db := dao.Table(ctx)
 
 	if len(filterFunc) > 0 && filterFunc[0] != nil {
 		db = db.Where(filterFunc[0](dao.Columns))
 	}
 
-	rst := db.Delete(&modelpkg.Mail{})
+	rst := db.Delete(&modelpkg.User{})
 
 	return rst.RowsAffected, rst.Error
 }
 
 // Update executes an update command to update documents in the collection.
-func (dao *Mail) Update(ctx context.Context, filterFunc MailFilterFunc, updateFunc MailUpdateFunc, columnFunc ...MailColumnFunc) (int64, error) {
+func (dao *User) Update(ctx context.Context, filterFunc UserFilterFunc, updateFunc UserUpdateFunc, columnFunc ...UserColumnFunc) (int64, error) {
 	db := dao.Table(ctx)
 
 	if filterFunc != nil {
@@ -128,7 +156,7 @@ func (dao *Mail) Update(ctx context.Context, filterFunc MailFilterFunc, updateFu
 }
 
 // Count returns the number of documents in the collection.
-func (dao *Mail) Count(ctx context.Context, filterFunc ...MailFilterFunc) (count int64, err error) {
+func (dao *User) Count(ctx context.Context, filterFunc ...UserFilterFunc) (count int64, err error) {
     db := dao.Table(ctx)
 
 	if len(filterFunc) > 0 && filterFunc[0] != nil {
@@ -141,7 +169,7 @@ func (dao *Mail) Count(ctx context.Context, filterFunc ...MailFilterFunc) (count
 }
 
 // Sum returns the sum of the given field.
-func (dao *Mail) Sum(ctx context.Context, columnFunc MailColumnFunc, filterFunc ...MailFilterFunc) (sums []float64, err error) {
+func (dao *User) Sum(ctx context.Context, columnFunc UserColumnFunc, filterFunc ...UserFilterFunc) (sums []float64, err error) {
 	columns := columnFunc(dao.Columns)
 	if len(columns) == 0 {
 		return
@@ -174,7 +202,7 @@ func (dao *Mail) Sum(ctx context.Context, columnFunc MailColumnFunc, filterFunc 
 }
 
 // Avg returns the avg of the given field.
-func (dao *Mail) Avg(ctx context.Context, columnFunc MailColumnFunc, filterFunc ...MailFilterFunc) (avgs []float64, err error) {
+func (dao *User) Avg(ctx context.Context, columnFunc UserColumnFunc, filterFunc ...UserFilterFunc) (avgs []float64, err error) {
 	columns := columnFunc(dao.Columns)
 	if len(columns) == 0 {
 		return
@@ -207,9 +235,9 @@ func (dao *Mail) Avg(ctx context.Context, columnFunc MailColumnFunc, filterFunc 
 }
 
 // First executes a first command and returns a model for one record in the table.
-func (dao *Mail) First(ctx context.Context, filterFunc MailFilterFunc, columnFunc ...MailColumnFunc) (*modelpkg.Mail, error) {
+func (dao *User) First(ctx context.Context, filterFunc UserFilterFunc, columnFunc ...UserColumnFunc) (*modelpkg.User, error) {
 	var (
-		model = &modelpkg.Mail{}
+		model = &modelpkg.User{}
 		db    = dao.Table(ctx)
 	)
 
@@ -236,9 +264,9 @@ func (dao *Mail) First(ctx context.Context, filterFunc MailFilterFunc, columnFun
 }
 
 // Last executes a last command and returns a model for one record in the table.
-func (dao *Mail) Last(ctx context.Context, filterFunc MailFilterFunc, columnFunc ...MailColumnFunc) (*modelpkg.Mail, error) {
+func (dao *User) Last(ctx context.Context, filterFunc UserFilterFunc, columnFunc ...UserColumnFunc) (*modelpkg.User, error) {
 	var (
-		model = &modelpkg.Mail{}
+		model = &modelpkg.User{}
 		db    = dao.Table(ctx)
 	)
 
@@ -265,9 +293,9 @@ func (dao *Mail) Last(ctx context.Context, filterFunc MailFilterFunc, columnFunc
 }
 
 // FindOne executes a take command and returns a model for one record in the table.
-func (dao *Mail) FindOne(ctx context.Context, filterFunc MailFilterFunc, columnFunc ...MailColumnFunc) (*modelpkg.Mail, error) {
+func (dao *User) FindOne(ctx context.Context, filterFunc UserFilterFunc, columnFunc ...UserColumnFunc) (*modelpkg.User, error) {
 	var (
-		model = &modelpkg.Mail{}
+		model = &modelpkg.User{}
 		db    = dao.Table(ctx)
 	)
 
@@ -294,9 +322,9 @@ func (dao *Mail) FindOne(ctx context.Context, filterFunc MailFilterFunc, columnF
 }
 
 // FindMany executes a find command and returns many models the matching documents in the collection.
-func (dao *Mail) FindMany(ctx context.Context, filterFunc MailFilterFunc, columnFunc MailColumnFunc, orderFunc MailOrderFunc, limitAndOffset ...int) ([]*modelpkg.Mail, error) {
+func (dao *User) FindMany(ctx context.Context, filterFunc UserFilterFunc, columnFunc UserColumnFunc, orderFunc UserOrderFunc, limitAndOffset ...int) ([]*modelpkg.User, error) {
 	var (
-		models = make([]*modelpkg.Mail, 0)
+		models = make([]*modelpkg.User, 0)
 		db     = dao.Table(ctx)
 	)
 
