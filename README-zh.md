@@ -1,4 +1,4 @@
-# mongo-dao-generator
+# gorm-dao-generator
 
 [English Document](README.md)
 

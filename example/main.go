@@ -33,7 +33,7 @@ func main() {
 		SendTime: time.Now(),
 	})
 	if err != nil {
-		log.Fatalf("failed to insert into mongo database: %v", err)
+		log.Fatalf("failed to insert into mysql database: %v", err)
 	}
 
 	mail, err := mailDao.FindOne(baseCtx, func(cols *dao.MailColumns) interface{} {
@@ -42,7 +42,7 @@ func main() {
 		}
 	})
 	if err != nil {
-		log.Fatalf("failed to find a row of data from mongo database: %v", err)
+		log.Fatalf("failed to find a row of data from mysql database: %v", err)
 	}
 
 	log.Printf("%+v", mail)
