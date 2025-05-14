@@ -1,6 +1,6 @@
 # mongo-dao-generator
 
-[English Document](README.md)
+[English Document](README-zh.md)
 
 ### 1.Introduction
 
