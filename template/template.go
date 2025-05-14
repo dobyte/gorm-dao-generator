@@ -86,7 +86,7 @@ func (dao *${VarDaoClassName}) New(tx *gorm.DB) *${VarDaoClassName} {
 }
 
 // Table create a new table db instance
-func (dao *GameRoom) Table() *gorm.DB {
+func (dao *${VarDaoClassName}) Table() *gorm.DB {
 	return dao.Database.Model(dao.model).Table(dao.TableName)
 }
 
