@@ -43,7 +43,7 @@ Flags:
   -model-dir string
         specify the model directory; must be set
   -model-names string
-        specify the comma-separated list of model name; must be set
+		specify one or more modelName[:tableName] pairs; must be set
   -model-pkg-alias string
         specify a model package alias; default no alias
   -model-pkg-path string

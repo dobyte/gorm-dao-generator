@@ -1,15 +1,16 @@
 package main
 
 import (
-	"github.com/dobyte/gorm-dao-generator/template"
 	"go/ast"
 	"go/token"
-	"golang.org/x/tools/go/packages"
 	"log"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
+
+	"github.com/dobyte/gorm-dao-generator/template"
+	"golang.org/x/tools/go/packages"
 )
 
 const (
@@ -41,7 +42,6 @@ type options struct {
 	modelPkgPath  string
 	modelPkgAlias string
 	modelNames    []string
-	tableNames    []string
 	daoDir        string
 	daoPkgPath    string
 	subPkgEnable  bool

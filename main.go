@@ -10,7 +10,7 @@ import (
 
 var (
 	modelDir      = flag.String("model-dir", "", "specify the model directory; must be set")
-	modelNames    = flag.String("model-names", "", "specify the comma-separated list of model name; must be set")
+	modelNames    = flag.String("model-names", "", "specify one or more modelName[:tableName] pairs; must be set")
 	modelPkgPath  = flag.String("model-pkg-path", "", "specify the package path corresponding to the model directory; automatically calculated by default")
 	modelPkgAlias = flag.String("model-pkg-alias", "", "specify a model package alias; default no alias")
 	daoDir        = flag.String("dao-dir", "", "specify the output directory of dao files; must be set")
@@ -30,10 +30,10 @@ func usage() {
 	flag.PrintDefaults()
 }
 
-//go:generate gorm-dao-generator -type=Mail,User
-//go:generate gorm-dao-generator -type=Mail:email,User:user
-//go:generate gorm-dao-generator -type=Mail:email,User
-//go:generate gorm-dao-generator -type=Mail,User:user
+//go:generate gorm-dao-generator -model-names=Mail,User
+//go:generate gorm-dao-generator -model-names=Mail:email,User:user
+//go:generate gorm-dao-generator -model-names=Mail:email,User
+//go:generate gorm-dao-generator -model-names=Mail,User:user
 func main() {
 	log.SetFlags(0)
 	log.SetPrefix("gorm-dao-generator: ")

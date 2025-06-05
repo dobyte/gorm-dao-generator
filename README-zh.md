@@ -43,7 +43,7 @@ go env -w GOSUMDB=on
   -model-dir string
         指定模型所在目录；必需设置
   -model-names string
-        指定一个或多个模型名称，以逗号分隔；必需设置
+        指定一个或多个模型名【:表名】对儿，以逗号分隔；必需设置
   -model-pkg-alias string
         指定模型包别名；默认无别名
   -model-pkg-path string
